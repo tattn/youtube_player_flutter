@@ -289,23 +289,34 @@ class _YoutubePlayerState extends State<YoutubePlayer> {
   }
 
   Widget _buildPlayer({required Widget errorWidget}) {
+    final safeAreaPaddingH = MediaQuery.of(context).padding.left +
+        MediaQuery.of(context).padding.right;
     return AspectRatio(
       aspectRatio: _aspectRatio,
       child: Stack(
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
-          RawYoutubePlayer(
-            key: widget.key,
-            onEnded: (YoutubeMetaData metaData) {
-              if (controller.flags.loop) {
-                controller.load(controller.metadata.videoId,
-                    startAt: controller.flags.startAt,
-                    endAt: controller.flags.endAt);
-              }
+          Transform.scale(
+            scale: controller.value.isFullScreen
+                ? (1 /
+                        _aspectRatio *
+                        (MediaQuery.of(context).size.width -
+                            safeAreaPaddingH)) /
+                    MediaQuery.of(context).size.height
+                : 1,
+            child: RawYoutubePlayer(
+              key: widget.key,
+              onEnded: (YoutubeMetaData metaData) {
+                if (controller.flags.loop) {
+                  controller.load(controller.metadata.videoId,
+                      startAt: controller.flags.startAt,
+                      endAt: controller.flags.endAt);
+                }
 
-              widget.onEnded?.call(metaData);
-            },
+                widget.onEnded?.call(metaData);
+              },
+            ),
           ),
           if (!controller.flags.hideThumbnail)
             AnimatedOpacity(
